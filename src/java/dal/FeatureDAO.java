@@ -4,7 +4,6 @@ package dal;
 import java.sql.*;
 import java.util.*;
 import model.iam.Feature;
-import dal.DBContext;
 import model.BaseModel;
 
 public class FeatureDAO extends DBContext {
@@ -12,7 +11,7 @@ public class FeatureDAO extends DBContext {
     public List<Feature> getFeaturesByUser(int uid) {
         List<Feature> list = new ArrayList<>();
         String sql = """
-            SELECT DISTINCT f.fid, f.url
+            SELECT DISTINCT f.fid, f.url,f.fname
             FROM Feature f
             JOIN RoleFeature rf ON rf.fid = f.fid
             JOIN UserRole ur ON ur.rid = rf.rid
@@ -25,6 +24,7 @@ public class FeatureDAO extends DBContext {
                 Feature f = new Feature();
                 f.setId(rs.getInt("fid"));
                 f.setUrl(rs.getString("url"));
+                f.setFname(rs.getString("fname"));
                 list.add(f);
             }
         } catch (SQLException e) {

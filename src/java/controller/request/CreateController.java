@@ -3,6 +3,7 @@ package controller.request;
 import controller.iam.BaseRequiredAuthorizationController;
 import dal.EmployeeDBContext;
 import dal.DBContext;
+import dal.RequestForLeaveDBContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,15 +16,15 @@ import model.Employee;
 import model.RequestForLeave;
 import model.iam.User;
 
-@WebServlet(urlPatterns = "/create")
+@WebServlet(urlPatterns = "/request/create")
 public class CreateController extends BaseRequiredAuthorizationController {
 
     @Override
     protected void processGet(HttpServletRequest req, HttpServletResponse resp, User user)
             throws ServletException, IOException {
-        req.getRequestDispatcher("Create.jsp").forward(req, resp);
+        req.getRequestDispatcher("/view/request/Create.jsp").forward(req, resp);
     }
-
+     
     @Override
     protected void processPost(HttpServletRequest req, HttpServletResponse resp, User user)
             throws ServletException, IOException {
@@ -49,31 +50,8 @@ public class CreateController extends BaseRequiredAuthorizationController {
             r.setReason(reason);
             r.setStatus(0); // 0 = Inprogress
 
-           DBContext db = new DBContext() {
-                @Override
-                public ArrayList list() {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
-                @Override
-                public BaseModel get(int id) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
-                @Override
-                public void insert(BaseModel model) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
-                @Override
-                public void update(BaseModel model) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
-
-                @Override
-                public void delete(BaseModel model) {
-                    throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-                }
+           RequestForLeaveDBContext db = new RequestForLeaveDBContext(){
+               
             };
             db.insert(r);
 
@@ -83,6 +61,6 @@ public class CreateController extends BaseRequiredAuthorizationController {
             req.setAttribute("message", "Có lỗi xảy ra khi tạo đơn nghỉ phép!");
         }
 
-        req.getRequestDispatcher("Create.jsp").forward(req, resp);
+        req.getRequestDispatcher("/view/request/Create.jsp").forward(req, resp);
     }
 }

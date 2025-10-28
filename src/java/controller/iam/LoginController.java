@@ -27,10 +27,10 @@ public class LoginController extends HttpServlet {
             HttpSession session = req.getSession();
             session.setAttribute("auth", u);
 
-            // 🕒 Set thời gian hết hạn session sau 5 phút (300 giây)
-            session.setMaxInactiveInterval(5 * 60);
+            session.setMaxInactiveInterval(30 * 60);
 
-            req.setAttribute("message", "Login Successful!");
+            resp.sendRedirect(req.getContextPath() + "/home");
+            return;
         } else {
             req.setAttribute("message", "Login Failed!");
         }

@@ -36,5 +36,9 @@ public class Employee extends BaseModel {
     public void setSupervisor(Employee supervisor) {
         this.supervisor = supervisor;
     }
+
+    public boolean isManager() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     
 }
