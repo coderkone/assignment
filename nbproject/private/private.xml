@@ -3,25 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/web/view/request/list.jsp</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/controller/request/CreateController.java</file>
             <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/controller/request/ListController.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/controller/iam/LoginController.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/controller/home/HomeController.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/controller/iam/BaseRequiredAuthenticationController.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/model/RequestForLeave.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/dal/EmployeeDBContext.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/dal/RoleDBContext.java</file>
             <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/dal/RequestForLeaveDBContext.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/web/view/request/review.jsp</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/model/iam/Feature.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/controller/request/ReviewController.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/web/view/auth/message.jsp</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/dal/UserDBContext.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/model/iam/Role.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/controller/iam/BaseRequiredAuthorizationController.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/dal/FeatureDAO.java</file>
-            <file>file:/C:/ky_4/PRJ301/FALL2025_Assignment/src/java/model/iam/User.java</file>
         </group>
     </open-files>
 </project-private>

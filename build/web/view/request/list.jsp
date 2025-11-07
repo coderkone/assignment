@@ -1,58 +1,184 @@
-<%-- 
-    Document   : list
-    Created on : Oct 21, 2025, 10:37:00 PM
-    Author     : sonnt
---%>
-
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
-        <jsp:include page="../util/greeting.jsp"></jsp:include>
-            <table border="1px">
+<head>
+    <title>Danh sách đơn nghỉ phép</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #f3f6fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 30px 40px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        th {
+            background-color: #1a73e8;
+            color: #fff;
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 15px;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f8faff;
+        }
+
+        .status-processing {
+            color: #f9a825;
+            font-weight: bold;
+        }
+
+        .status-approved {
+            color: #43a047;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            color: #e53935;
+            font-weight: bold;
+        }
+
+        .action-links a {
+            text-decoration: none;
+            margin-right: 10px;
+            font-weight: 500;
+            color: #1a73e8;
+            padding: 6px 10px;
+            border-radius: 5px;
+            transition: 0.25s;
+            border: 1px solid transparent;
+        }
+
+        .action-links a:hover {
+            background-color: #e8f0fe;
+            border-color: #1a73e8;
+        }
+
+        .btn-home {
+            display: block;
+            width: fit-content;
+            margin: 30px auto 0;
+            background-color: #1a73e8;
+            color: white;
+            text-align: center;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .btn-home:hover {
+            background-color: #155fc1;
+        }
+
+        .info-bar {
+            text-align: center;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>Danh sách đơn nghỉ phép</header>
+
+    <div class="container">
+        <div class="info-bar">
+            <jsp:include page="../util/greeting.jsp"></jsp:include>
+        </div>
+
+        <table>
+            <thead>
                 <tr>
-                    <td>request id</td>
-                    <td>created by</td>
-                    <td>reason</td>
-                    <td>from</td>
-                    <td>to</td>
-                    <td>status</td>
-                    <td>processed by</td>
+                    <th>Mã đơn</th>
+                    <th>Người tạo</th>
+                    <th>Lý do</th>
+                    <th>Từ ngày</th>
+                    <th>Đến ngày</th>
+                    <th>Trạng thái</th>
+                    <th>Xử lý</th>
                 </tr>
-            <c:forEach items="${requestScope.rfls}" var="r">
-                <tr>
-                    <td>${r.id}</td>
-                    <td>${r.created_by.name}</td>
-                    <td>${r.reason}</td>
-                    <td>${r.from}</td>
-                    <td>${r.to}</td>
-                    <td>
-                        ${r.status eq 0?"processing":
-                          r.status eq 1?"approved":"rejected"
-                        }
-                    </td>
-                    <td>
-                        <c:if test="${r.processed_by ne null}">
-                            ${r.processed_by.name}, you can change it to
-                            <c:if test="${r.status eq 1}">
-                            <a href="review">Rejected</a>
-                            </c:if>
-                             <c:if test="${r.status eq 2}">
-                            <a href="review">Approved</a>
-                            </c:if>
-                        </c:if>
-                        <c:if test="${r.processed_by eq null}">
-                            <a href="review">Approve</a>
-                            <a href="review">Reject</a>
-                        </c:if>
-                    </td>
-                </tr>
-            </c:forEach>
+            </thead>
+            <tbody>
+                <c:forEach items="${requestScope.rfls}" var="r">
+                    <tr>
+                        <td>${r.id}</td>
+                        <td>${r.created_by.name}</td>
+                        <td>${r.reason}</td>
+                        <td>${r.from}</td>
+                        <td>${r.to}</td>
+                        <td>
+                            <span class="${r.status eq 0 ? 'status-processing' : r.status eq 1 ? 'status-approved' : 'status-rejected'}">
+                                ${r.status eq 0 ? "Đang xử lý" : r.status eq 1 ? "Đã duyệt" : "Từ chối"}
+                            </span>
+                        </td>
+                        <td class="action-links">
+                            <c:choose>
+                                <c:when test="${r.processed_by ne null}">
+                                    ${r.processed_by.name}
+                                    <c:if test="${r.status eq 1}">
+                                        <a href="${pageContext.request.contextPath}/request/review?rid=${r.id}">Từ chối</a>
+                                    </c:if>
+                                    <c:if test="${r.status eq 2}">
+                                        <a href="${pageContext.request.contextPath}/request/review?rid=${r.id}">Duyệt lại</a>
+                                    </c:if>
+                                </c:when>
+                                <c:otherwise>
+                                    <a href="${pageContext.request.contextPath}/request/review?rid=${r.id}">Duyệt</a>
+                                    <a href="${pageContext.request.contextPath}/request/review?rid=${r.id}">Từ chối</a>
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
         </table>
-    </body>
+
+        <a href="${pageContext.request.contextPath}/home" class="btn-home">Quay lại trang chủ</a>
+    </div>
+</body>
 </html>
