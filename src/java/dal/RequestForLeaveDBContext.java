@@ -17,16 +17,6 @@ import model.Employee;
  */
 public class RequestForLeaveDBContext extends DBContext<RequestForLeave> {
 
-    public ArrayList<RequestForLeave> list(int pageindex, int pagesize) {
-        ArrayList<RequestForLeave> requests = new ArrayList<>();
-        try {
-            string sql ="""
-                        SELECT 
-                        """
-        
-        }
-    }
-
     public ArrayList<RequestForLeave> getByEmployeeAndSubodiaries(int eid) {
         ArrayList<RequestForLeave> rfls = new ArrayList<>();
         try {
@@ -86,16 +76,6 @@ public class RequestForLeaveDBContext extends DBContext<RequestForLeave> {
             closeConnection();
         }
         return rfls;
-    }
-
-    @Override
-    public ArrayList<RequestForLeave> list() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public RequestForLeave get(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -200,8 +180,136 @@ public class RequestForLeaveDBContext extends DBContext<RequestForLeave> {
         }
     }
 
+    public ArrayList<RequestForLeave> searchByEmployeeAndSubordinates(
+            int userId, String searchValue, Integer status, Date from, Date to) {
+        ArrayList<RequestForLeave> list = new ArrayList<>();
+        String sql = """
+        WITH RecursiveEmp AS (
+            SELECT e.eid
+            FROM Employee e
+            JOIN Enrollment en ON e.eid = en.eid
+            WHERE en.uid = ?
+            UNION ALL
+            SELECT e2.eid
+            FROM Employee e2
+            INNER JOIN RecursiveEmp re ON e2.supervisorid = re.eid
+        )
+        SELECT r.rid, r.reason, r.status, r.[from], r.[to],
+               c.eid AS created_by, c.ename AS creator_name,
+               p.eid AS processed_by, p.ename AS processor_name
+        FROM RequestForLeave r
+        JOIN Employee c ON r.created_by = c.eid
+        LEFT JOIN Employee p ON r.processed_by = p.eid
+        WHERE r.created_by IN (SELECT eid FROM RecursiveEmp)
+          AND (
+              ? IS NULL 
+              OR c.ename LIKE ? 
+              OR CAST(c.eid AS NVARCHAR) = ?
+          )
+          AND (? IS NULL OR r.status = ?)
+          AND (? IS NULL OR r.[from] >= ?)
+          AND (? IS NULL OR r.[to] <= ?)
+        ORDER BY r.[from] DESC
+    """;
+
+        try (PreparedStatement stm = connection.prepareStatement(sql)) {
+            stm.setInt(1, userId);
+
+            stm.setString(2, searchValue);
+            stm.setString(3, searchValue == null ? null : "%" + searchValue + "%");
+            stm.setString(4, searchValue);
+
+            stm.setObject(5, status);
+            stm.setObject(6, status);
+
+            stm.setDate(7, from);
+            stm.setDate(8, from);
+
+            stm.setDate(9, to);
+            stm.setDate(10, to);
+
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                RequestForLeave r = new RequestForLeave();
+                r.setId(rs.getInt("rid"));
+                r.setReason(rs.getString("reason"));
+                r.setStatus(rs.getInt("status"));
+                r.setFrom(rs.getDate("from"));
+                r.setTo(rs.getDate("to"));
+
+                Employee creator = new Employee();
+                creator.setId(rs.getInt("created_by"));
+                creator.setName(rs.getString("creator_name"));
+                r.setCreated_by(creator);
+
+                Employee processor = new Employee();
+                processor.setId(rs.getInt("processed_by"));
+                processor.setName(rs.getString("processor_name"));
+                r.setProcessed_by(processor);
+
+                list.add(r);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public ArrayList<RequestForLeave> page(int pageindex, int pagesize) {
+        ArrayList<RequestForLeave> list = new ArrayList<>();
+        try {
+            String sql = """
+            SELECT r.rid, r.reason, r.status, r.[from], r.[to],
+                   c.eid AS created_by, c.ename AS creator_name,
+                   p.eid AS processed_by, p.ename AS processor_name
+            FROM RequestForLeave r
+            JOIN Employee c ON r.created_by = c.eid
+            LEFT JOIN Employee p ON r.processed_by = p.eid
+            ORDER BY r.rid
+            OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+        """;
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setInt(1, (pageindex - 1) * pagesize);
+            stm.setInt(2, pagesize);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                RequestForLeave r = new RequestForLeave();
+                r.setId(rs.getInt("rid"));
+                r.setReason(rs.getString("reason"));
+                r.setStatus(rs.getInt("status"));
+                r.setFrom(rs.getDate("from"));
+                r.setTo(rs.getDate("to"));
+
+                Employee createdBy = new Employee();
+                createdBy.setId(rs.getInt("created_by"));
+                createdBy.setName(rs.getString("creator_name"));
+                r.setCreated_by(createdBy);
+
+                Employee processedBy = new Employee();
+                processedBy.setId(rs.getInt("processed_by"));
+                processedBy.setName(rs.getString("processor_name"));
+                r.setProcessed_by(processedBy);
+
+                list.add(r);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     @Override
     public void update(RequestForLeave model) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public RequestForLeave get(int id) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public ArrayList<RequestForLeave> list() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
