@@ -242,6 +242,10 @@
                                 </td>
                                 <td class="action-links">
                                     <c:choose>
+                                        <c:when test="${r.status eq 0}">
+                                            <a href="${pageContext.request.contextPath}/request/review?rid=${r.id}">Duyệt</a>
+                                            <a href="${pageContext.request.contextPath}/request/review?rid=${r.id}">Từ chối</a>
+                                        </c:when>
                                         <c:when test="${r.processed_by ne null}">
                                             ${r.processed_by.name}
                                             <c:if test="${r.status eq 1}">

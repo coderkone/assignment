@@ -90,7 +90,7 @@
     <body>
         <div class="login-container">
             <h2>Đăng nhập hệ thống</h2>
-            <form action="login" method="POST">
+            <form action="${pageContext.request.contextPath}/login" method="POST">
                 <div class="form-group">
                     <label for="txtUsername">Tên đăng nhập</label>
                     <input type="text" name="username" id="txtUsername" required/>

@@ -109,15 +109,15 @@
         <div class="container">
             <h2>Tạo đơn xin nghỉ phép</h2>
 
-            <form action="${pageContext.request.contextPath}/request/list" method="post">
+            <form action="${pageContext.request.contextPath}/request/create" method="post">
                 <label for="from">Từ ngày:</label>
                 <input type="date" id="from" name="from" required>
 
                 <label for="to">Đến ngày:</label>
                 <input type="date" id="to" name="to" required>
 
-                <label for="subject">Lý do nghỉ:</label>
-                <textarea id="subject" name="subject" rows="3" placeholder="Nhập lý do nghỉ..." required></textarea>
+                <label for="reason">Lý do nghỉ:</label>
+                <textarea id="reason" name="reason" rows="3" placeholder="Nhập lý do nghỉ..." required></textarea>
 
                 <label class="checkbox-label">
                     <input type="checkbox" name="online" value="true"> Làm việc online
@@ -125,7 +125,7 @@
 
                 <div class="buttons">
                     <button type="submit" name="action" value="save" class="btn btn-primary">Lưu</button>               
-                    <a href="${pageContext.request.contextPath}/requet/list" class="btn btn-secondary">Quay lại danh sách</a>
+                    <a href="${pageContext.request.contextPath}/request/list" class="btn btn-secondary">Quay lại danh sách</a>
                 </div>
             </form>
         </div>

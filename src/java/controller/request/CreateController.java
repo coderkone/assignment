@@ -3,12 +3,14 @@ package controller.request;
 import controller.iam.BaseRequiredAuthorizationController;
 import dal.EmployeeDBContext;
 import dal.RequestForLeaveDBContext;
+import dal.UserDBContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.sql.Date;
 import model.Employee;
 import model.RequestForLeave;
@@ -24,50 +26,56 @@ public class CreateController extends BaseRequiredAuthorizationController {
         req.getRequestDispatcher("/view/request/Create.jsp").forward(req, resp);
     }
 
-    @Override
-    protected void processPost(HttpServletRequest req, HttpServletResponse resp, User user)
+    // Logic mẫu trong CreateController.java (doPost method)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // 1. Thu thập dữ liệu từ JSP
+        String from_raw = request.getParameter("from");
+        String to_raw = request.getParameter("to");
+        String reason = request.getParameter("reason"); // Tên tham số là 'subject'
+
+        HttpSession session = request.getSession();
+        User authenticatedUser = (User) session.getAttribute("auth");
+
+        // Kiểm tra bảo vệ (Guard Check)
+        if (authenticatedUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // 2. 🎯 SỬ DỤNG HÀM getByUserId() CỦA BẠN 🎯
+        // Khởi tạo DBContext và gọi hàm
+        EmployeeDBContext empDB = new EmployeeDBContext();
+        Employee createdBy = empDB.getByUserId(authenticatedUser.getId());
         try {
-            // Lấy dữ liệu từ form
-            String fromStr = req.getParameter("from");
-            String toStr = req.getParameter("to");
-            String reason = req.getParameter("reason");
+            // 3. Chuẩn bị đối tượng RequestForLeave
+            RequestForLeave rfl = new RequestForLeave();
+            rfl.setCreated_by(createdBy);
+            rfl.setCreated_time(new Timestamp(System.currentTimeMillis()));
+            rfl.setFrom(java.sql.Date.valueOf(from_raw));
+            rfl.setTo(java.sql.Date.valueOf(to_raw));
+            rfl.setReason(reason);
+            rfl.setStatus(0); // Mặc định là 'Đang xử lý' (0)
+            // rfl.setProcessed_by(null); // Không cần set nếu nó là null
 
-            // Kiểm tra hợp lệ dữ liệu đầu vào
-            if (fromStr == null || toStr == null || reason == null
-                    || fromStr.isEmpty() || toStr.isEmpty() || reason.trim().isEmpty()) {
-                req.setAttribute("message", "Vui lòng nhập đầy đủ thông tin!");
-                req.getRequestDispatcher("/view/request/Create.jsp").forward(req, resp);
-                return;
-            }
-
-            Date from = Date.valueOf(fromStr);
-            Date to = Date.valueOf(toStr);
-
-            // Lấy nhân viên tương ứng với người dùng đăng nhập
-            EmployeeDBContext edb = new EmployeeDBContext();
-            Employee emp = edb.getByUserId(user.getId());
-
-            // Tạo đối tượng RequestForLeave
-            RequestForLeave r = new RequestForLeave();
-            r.setCreated_by(emp);
-            r.setFrom(from);
-            r.setTo(to);
-            r.setReason(reason);
-            r.setStatus(0); // 0 = In progress
-
-            // Lưu vào database
+            // 4. Gọi DB Context để lưu dữ liệu
             RequestForLeaveDBContext db = new RequestForLeaveDBContext();
-            db.insert(r);
+            db.insert(rfl);
 
-            // ✅ Sau khi lưu thành công → chuyển hướng sang trang danh sách
-            resp.sendRedirect(req.getContextPath() + "/request/list");
-
+            response.sendRedirect(request.getContextPath() +"/request/list");
+            return;
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("message", "Có lỗi xảy ra khi tạo đơn nghỉ phép!");
-            req.getRequestDispatcher("/view/request/Create.jsp").forward(req, resp);
+            request.setAttribute("error", "Lỗi tạo đơn: " + e.getMessage());
+            return;
         }
     }
+
+    @Override
+    protected void processPost(HttpServletRequest req, HttpServletResponse resp, User user) throws ServletException, IOException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    
 }

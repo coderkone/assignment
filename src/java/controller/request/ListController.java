@@ -31,12 +31,20 @@ public class ListController extends BaseRequiredAuthorizationController {
             throws ServletException, IOException {
 
         String searchValue = req.getParameter("searchValue");
+
+        String status_raw = req.getParameter("status");
         Integer status = null;
-        if (req.getParameter("status") != null && !req.getParameter("status").isEmpty()) {
-            status = Integer.parseInt(req.getParameter("status"));
+
+        if (status_raw != null && !status_raw.trim().isEmpty()) {
+            try {
+                status = Integer.parseInt(status_raw);
+            } catch (Exception e) {
+                status = null;
+            }
         }
 
         Date from = null, to = null;
+
         if (req.getParameter("from") != null && !req.getParameter("from").isEmpty()) {
             from = Date.valueOf(req.getParameter("from"));
         }
@@ -47,6 +55,7 @@ public class ListController extends BaseRequiredAuthorizationController {
         int pageSize = 10;
         int pageIndex = 1;
         String page_raw = req.getParameter("page");
+
         if (page_raw != null && !page_raw.isEmpty()) {
             try {
                 pageIndex = Integer.parseInt(page_raw);
@@ -56,29 +65,37 @@ public class ListController extends BaseRequiredAuthorizationController {
         }
 
         RequestForLeaveDBContext db = new RequestForLeaveDBContext();
+
         ArrayList<RequestForLeave> rfls;
         int totalRecords;
 
-        // 🔹 Trường hợp đầu tiên truy cập (không có tìm kiếm / lọc)
-        if ((searchValue == null || searchValue.isEmpty()) 
-                && status == null 
-                && from == null 
+        // ================================================
+        //  CASE 1: Không có filter → load toàn bộ có phân trang
+        // ================================================
+        if ((searchValue == null || searchValue.isEmpty())
+                && status == null
+                && from == null
                 && to == null) {
 
-            rfls = db.page(pageIndex, pageSize);
-            totalRecords = db.count(); // ✅ đếm tổng bản ghi, không phải tổng trang
-        } 
-        // 🔹 Có điều kiện lọc
+            rfls = db.page(pageIndex, pageSize);  // lấy 10 record / trang
+            totalRecords = db.count();            // đếm tổng record
+        } // ================================================
+        //  CASE 2: Có filter → search trước rồi phân trang
+        // ================================================
         else {
-            ArrayList<RequestForLeave> all = db.searchByEmployeeAndSubordinates(user.getId(), searchValue, status, from, to);
+
+            ArrayList<RequestForLeave> all
+                    = db.searchByEmployeeAndSubordinates(user.getId(), searchValue, status, from, to);
+
             totalRecords = all.size();
 
             if (all.isEmpty()) {
-                req.setAttribute("message", "Không tìm thấy đơn nào phù hợp!");
                 rfls = new ArrayList<>();
+                req.setAttribute("message", "Không tìm thấy đơn nào phù hợp!");
             } else {
                 int fromIndex = (pageIndex - 1) * pageSize;
                 int toIndex = Math.min(fromIndex + pageSize, all.size());
+
                 if (fromIndex < all.size()) {
                     rfls = new ArrayList<>(all.subList(fromIndex, toIndex));
                 } else {
@@ -91,7 +108,8 @@ public class ListController extends BaseRequiredAuthorizationController {
 
         req.setAttribute("rfls", rfls);
         req.setAttribute("pageindex", pageIndex);
-        req.setAttribute("totalpage", totalPages); // ✅ khớp với JSP (totalpage)
+        req.setAttribute("totalpage", totalPages);
+
         req.setAttribute("searchValue", searchValue);
         req.setAttribute("status", status);
         req.setAttribute("from", from);

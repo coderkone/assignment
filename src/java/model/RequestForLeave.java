@@ -8,7 +8,6 @@ import java.util.Date;
 
 
 
-
 /**
  *
  * @author sonnt
@@ -34,9 +33,9 @@ public class RequestForLeave extends BaseModel {
         return created_time;
     }
 
-    public void setCreated_time(Date created_time) {
-        this.created_time = created_time;
-    }
+   public void setCreated_time(java.sql.Timestamp created_time) { 
+    this.created_time = created_time;
+}
 
     public java.sql.Date getFrom() {
         return from;

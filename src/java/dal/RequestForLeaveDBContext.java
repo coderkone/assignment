@@ -106,7 +106,6 @@ public class RequestForLeaveDBContext extends DBContext<RequestForLeave> {
         } catch (SQLException ex) {
             Logger.getLogger(RequestForLeaveDBContext.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            closeConnection();
         }
     }
 
@@ -218,15 +217,29 @@ public class RequestForLeaveDBContext extends DBContext<RequestForLeave> {
             stm.setString(2, searchValue);
             stm.setString(3, searchValue == null ? null : "%" + searchValue + "%");
             stm.setString(4, searchValue);
+            if (status == null) {
+                stm.setNull(5, java.sql.Types.INTEGER);
+                stm.setNull(6, java.sql.Types.INTEGER);
+            } else {
+                stm.setInt(5, status);
+                stm.setInt(6, status);
+            }
 
-            stm.setObject(5, status);
-            stm.setObject(6, status);
+            if (from == null) {
+                stm.setNull(7, Types.DATE);
+                stm.setNull(8, Types.DATE);
+            } else {
+                stm.setDate(7, from);
+                stm.setDate(8, from);
+            }
 
-            stm.setDate(7, from);
-            stm.setDate(8, from);
-
-            stm.setDate(9, to);
-            stm.setDate(10, to);
+            if (to == null) {
+                stm.setNull(9, Types.DATE);
+                stm.setNull(10, Types.DATE);
+            } else {
+                stm.setDate(9, to);
+                stm.setDate(10, to);
+            }
 
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
@@ -242,10 +255,13 @@ public class RequestForLeaveDBContext extends DBContext<RequestForLeave> {
                 creator.setName(rs.getString("creator_name"));
                 r.setCreated_by(creator);
 
-                Employee processor = new Employee();
-                processor.setId(rs.getInt("processed_by"));
-                processor.setName(rs.getString("processor_name"));
-                r.setProcessed_by(processor);
+                int pid = rs.getInt("processed_by");
+                if (!rs.wasNull()) {
+                    Employee processedBy = new Employee();
+                    processedBy.setId(pid);
+                    processedBy.setName(rs.getString("processor_name"));
+                    r.setProcessed_by(processedBy);
+                }
 
                 list.add(r);
             }
@@ -297,6 +313,25 @@ public class RequestForLeaveDBContext extends DBContext<RequestForLeave> {
         }
         return list;
     }
+
+    public int count() {
+        int total = 0;
+        try {
+            String sql = "SELECT COUNT(*) AS total FROM RequestForLeave";
+            PreparedStatement stm = connection.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt("total");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            closeConnection();
+        }
+        return total;
+    }
+    
+    
 
     @Override
     public void update(RequestForLeave model) {
