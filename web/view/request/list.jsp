@@ -218,7 +218,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Mã đơn</th>
                             <th>Người tạo</th>
                             <th>Lý do</th>
                             <th>Từ ngày</th>
@@ -230,7 +229,6 @@
                     <tbody>
                         <c:forEach items="${rfls}" var="r">
                             <tr>
-                                <td>${r.id}</td>
                                 <td>${r.created_by.name}</td>
                                 <td>${r.reason}</td>
                                 <td>${r.from}</td>

@@ -30,6 +30,8 @@ public class ListController extends BaseRequiredAuthorizationController {
     private void processRequest(HttpServletRequest req, HttpServletResponse resp, User user)
             throws ServletException, IOException {
 
+        // 1. Lấy và xử lý các tham số lọc (search, status, from, to)
+
         String searchValue = req.getParameter("searchValue");
 
         String status_raw = req.getParameter("status");
@@ -52,6 +54,7 @@ public class ListController extends BaseRequiredAuthorizationController {
             to = Date.valueOf(req.getParameter("to"));
         }
 
+        // 2. Lấy và xử lý tham số phân trang
         int pageSize = 10;
         int pageIndex = 1;
         String page_raw = req.getParameter("page");
@@ -64,51 +67,43 @@ public class ListController extends BaseRequiredAuthorizationController {
             }
         }
 
+        // 3. Khai báo Context và biến
         RequestForLeaveDBContext db = new RequestForLeaveDBContext();
-
         ArrayList<RequestForLeave> rfls;
         int totalRecords;
 
-        // ================================================
-        //  CASE 1: Không có filter → load toàn bộ có phân trang
-        // ================================================
-        if ((searchValue == null || searchValue.isEmpty())
-                && status == null
-                && from == null
-                && to == null) {
+        // --------------------------------------------------------------------------------------
+        // **KHẮC PHỤC BẢO MẬT:** LUÔN SỬ DỤNG HÀM LỌC THEO PHÂN CẤP (searchByEmployeeAndSubordinates)
+        // Việc này đảm bảo người dùng chỉ xem được đơn của mình và cấp dưới.
+        // --------------------------------------------------------------------------------------
+        
+        // Lấy TẤT CẢ đơn đã lọc theo người tạo (người dùng hiện tại VÀ cấp dưới)
+        ArrayList<RequestForLeave> all
+                = db.searchByEmployeeAndSubordinates(user.getId(), searchValue, status, from, to);
 
-            rfls = db.page(pageIndex, pageSize);  // lấy 10 record / trang
-            totalRecords = db.count();            // đếm tổng record
-        } // ================================================
-        //  CASE 2: Có filter → search trước rồi phân trang
-        // ================================================
-        else {
+        totalRecords = all.size();
 
-            ArrayList<RequestForLeave> all
-                    = db.searchByEmployeeAndSubordinates(user.getId(), searchValue, status, from, to);
+        if (all.isEmpty()) {
+            rfls = new ArrayList<>();
+        } else {
+            // 4. Phân trang thủ công trên danh sách đã lọc
+            int fromIndex = (pageIndex - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, all.size());
 
-            totalRecords = all.size();
-
-            if (all.isEmpty()) {
-                rfls = new ArrayList<>();
-                req.setAttribute("message", "Không tìm thấy đơn nào phù hợp!");
+            if (fromIndex < all.size()) {
+                rfls = new ArrayList<>(all.subList(fromIndex, toIndex));
             } else {
-                int fromIndex = (pageIndex - 1) * pageSize;
-                int toIndex = Math.min(fromIndex + pageSize, all.size());
-
-                if (fromIndex < all.size()) {
-                    rfls = new ArrayList<>(all.subList(fromIndex, toIndex));
-                } else {
-                    rfls = new ArrayList<>();
-                }
+                rfls = new ArrayList<>();
             }
         }
 
+        // 5. Thiết lập dữ liệu và Forward
         int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
 
         req.setAttribute("rfls", rfls);
         req.setAttribute("pageindex", pageIndex);
         req.setAttribute("totalpage", totalPages);
+        req.setAttribute("totalrecords", totalRecords); // Gửi cả tổng số bản ghi
 
         req.setAttribute("searchValue", searchValue);
         req.setAttribute("status", status);
