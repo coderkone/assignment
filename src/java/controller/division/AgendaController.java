@@ -124,7 +124,7 @@ public class AgendaController extends HttpServlet {
         request.setAttribute("startDate", startDate);
         request.setAttribute("endDate", endDate);
         
-        request.getRequestDispatcher("/view/agenda.jsp").forward(request, response);
+        request.getRequestDispatcher("/view/request/agenda.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

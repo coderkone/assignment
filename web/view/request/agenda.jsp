@@ -1,8 +1,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@page import="viewmodel.AgendaData" %>
+<%@page import="model.AgendaData" %>
 <%@page import="java.sql.Date" %>
-<%@page import="util.DateUtil" %>
+<%@page import="controller.division.DateUtil" %>
 <%@page import="model.Employee" %>
 <%@page import="java.util.Map" %>
 
