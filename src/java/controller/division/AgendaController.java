@@ -56,41 +56,53 @@ public class AgendaController extends HttpServlet {
 
     /** Phương thức lấy dữ liệu Agenda Data tổng hợp từ DB cho TẤT CẢ nhân viên. */
     private AgendaData getAgendaDataForAllEmployees(Date startDate, Date endDate) {
-        EmployeeDBContext empDB = new EmployeeDBContext();
-        AgendaDBContext agendaDB = new AgendaDBContext();
+        try {
+            EmployeeDBContext empDB = new EmployeeDBContext();
+            AgendaDBContext agendaDB = new AgendaDBContext();
 
-        // Lấy TẤT CẢ nhân viên (Sử dụng hàm list() đã bổ sung)
-        ArrayList<Employee> employees = empDB.list(); 
-        
-        // Lấy TẤT CẢ đơn nghỉ phép đã duyệt (Sử dụng hàm đã sửa đổi)
-        ArrayList<RequestForLeave> requests = agendaDB.getApprovedRequests(startDate, endDate); 
-        
-        if (employees == null) employees = new ArrayList<>(); 
-        
-        Map<Integer, Map<Date, String>> employeeAgendaMap = new HashMap<>();
+            // Lấy TẤT CẢ nhân viên (Sử dụng hàm list() đã bổ sung)
+            ArrayList<Employee> employees = empDB.list(); 
+            System.out.println("DEBUG: Employees count = " + (employees != null ? employees.size() : "null"));
+            
+            // Lấy TẤT CẢ đơn nghỉ phép đã duyệt (Sử dụng hàm đã sửa đổi)
+            ArrayList<RequestForLeave> requests = agendaDB.getApprovedRequests(startDate, endDate); 
+            System.out.println("DEBUG: Approved requests count = " + (requests != null ? requests.size() : "null"));
+            
+            if (employees == null) employees = new ArrayList<>(); 
+            if (requests == null) requests = new ArrayList<>();
+            
+            Map<Integer, Map<Date, String>> employeeAgendaMap = new HashMap<>();
 
-        // Logic xử lý khoảng ngày nghỉ phép thành trạng thái TỪNG NGÀY
-        for (RequestForLeave rfl : requests) {
-            Date requestFrom = rfl.getFrom();
-            Date requestTo = rfl.getTo();
-            
-            int employeeId = rfl.getCreated_by() != null ? rfl.getCreated_by().getId() : -1; 
-            if(employeeId == -1) continue; 
-            
-            List<Date> datesInRequest = DateUtil.getDatesBetween(requestFrom, requestTo);
-            
-            for (Date date : datesInRequest) {
-                if (!date.before(startDate) && !date.after(endDate)) {
-                    employeeAgendaMap
-                            .computeIfAbsent(employeeId, k -> new HashMap<>())
-                            .put(date, "L");
+            // Logic xử lý khoảng ngày nghỉ phép thành trạng thái TỪNG NGÀY
+            for (RequestForLeave rfl : requests) {
+                Date requestFrom = rfl.getFrom();
+                Date requestTo = rfl.getTo();
+                
+                int employeeId = rfl.getCreated_by() != null ? rfl.getCreated_by().getId() : -1; 
+                if(employeeId == -1) continue; 
+                
+                List<Date> datesInRequest = DateUtil.getDatesBetween(requestFrom, requestTo);
+                
+                for (Date date : datesInRequest) {
+                    if (!date.before(startDate) && !date.after(endDate)) {
+                        employeeAgendaMap
+                                .computeIfAbsent(employeeId, k -> new HashMap<>())
+                                .put(date, "L");
+                    }
                 }
             }
-        }
 
-        List<Date> allDates = DateUtil.getDatesBetween(startDate, endDate);
-        
-        return new AgendaData(employees, allDates, employeeAgendaMap);
+            List<Date> allDates = DateUtil.getDatesBetween(startDate, endDate);
+            System.out.println("DEBUG: All dates count = " + (allDates != null ? allDates.size() : "null"));
+            
+            AgendaData data = new AgendaData(employees, allDates, employeeAgendaMap);
+            System.out.println("DEBUG: AgendaData created successfully");
+            return data;
+        } catch (Exception e) {
+            System.out.println("ERROR in getAgendaDataForAllEmployees: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
     
     // --------------------------------------------------------------------------

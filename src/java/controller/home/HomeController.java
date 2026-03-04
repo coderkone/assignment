@@ -17,7 +17,7 @@ public class HomeController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false); // không tạo session mới
-        User user = (User) (session != null ? session.getAttribute("auth") : null);
+        User user = (User) (session != null ? session.getAttribute("user") : null);
 
         if (user == null) {
             // ⚠️ Nếu chưa login hoặc session hết hạn

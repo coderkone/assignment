@@ -25,7 +25,7 @@ public class LoginController extends HttpServlet {
 
         if (u != null) {
             HttpSession session = req.getSession();
-            session.setAttribute("auth", u);
+            session.setAttribute("user", u);
 
             session.setMaxInactiveInterval(30 * 60);
 

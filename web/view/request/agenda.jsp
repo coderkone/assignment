@@ -39,7 +39,21 @@
             font-size: 0.85em;
         }
         .date-input { padding: 5px; margin-right: 10px; }
+        .filter-form {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
     </style>
+    <script>
+        function onDateChange() {
+            document.querySelector('form').submit();
+        }
+    </script>
 </head>
 <body>
     <div class="agenda-container">
@@ -49,14 +63,19 @@
             AgendaData agendaData = (AgendaData) request.getAttribute("agendaData");
             Date currentStartDate = (Date) request.getAttribute("startDate");
             Date currentEndDate = (Date) request.getAttribute("endDate");
+            
+            if (agendaData == null) {
+                out.println("<p style=\"color: red;\">Lỗi: Không thể lấy dữ liệu agenda. Vui lòng thử lại.</p>");
+                return;
+            }
         %>
 
-        <form action="division/agenda" method="get" style="margin-bottom: 20px;">
-            <label for="from">Từ ngày:</label>
-            <input type="date" id="from" name="from" value="<%= currentStartDate.toString() %>" class="date-input" required>
-            <label for="to">Đến ngày:</label>
-            <input type="date" id="to" name="to" value="<%= currentEndDate.toString() %>" class="date-input" required>
-            <button type="submit" style="padding: 5px 15px;">Xem Agenda</button>
+        <form action="${pageContext.request.contextPath}/division/agenda" method="get" class="filter-form">
+            <label for="from" style="font-weight: bold;">Từ ngày:</label>
+            <input type="date" id="from" name="from" value="<%= currentStartDate != null ? currentStartDate.toString() : "" %>" class="date-input" onchange="onDateChange()" required>
+            
+            <label for="to" style="font-weight: bold;">Đến ngày:</label>
+            <input type="date" id="to" name="to" value="<%= currentEndDate != null ? currentEndDate.toString() : "" %>" class="date-input" onchange="onDateChange()" required>
         </form>
 
         <c:if test="${agendaData.employees.isEmpty()}">
@@ -79,21 +98,29 @@
                             <td class="header-employee">${employee.name}</td>
                             <c:forEach var="date" items="${agendaData.allDates}">
                                 <% 
-                                    Employee currentEmp = (Employee)pageContext.getAttribute("employee");
-                                    Date currentDate = (Date)pageContext.getAttribute("date");
-                                    AgendaData currentData = (AgendaData)pageContext.getAttribute("agendaData");
-                                    
-                                    String status = "P"; // Mặc định là Đi làm (Present)
-                                    Map<Date, String> dailyMap = currentData.getEmployeeAgendaMap().get(currentEmp.getId());
-                                    
-                                    if (dailyMap != null && dailyMap.containsKey(currentDate)) {
-                                        status = dailyMap.get(currentDate); // "L" (Leave)
+                                    try {
+                                        Employee currentEmp = (Employee)pageContext.getAttribute("employee");
+                                        Date currentDate = (Date)pageContext.getAttribute("date");
+                                        AgendaData agendaDataFromRequest = (AgendaData)request.getAttribute("agendaData");
+                                        
+                                        String status = "P"; // Mặc định là Đi làm (Present)
+                                        
+                                        if (currentEmp != null && currentDate != null && agendaDataFromRequest != null) {
+                                            Map<Date, String> dailyMap = agendaDataFromRequest.getEmployeeAgendaMap().get(currentEmp.getId());
+                                            
+                                            if (dailyMap != null && dailyMap.containsKey(currentDate)) {
+                                                status = dailyMap.get(currentDate); // "L" (Leave)
+                                            }
+                                        }
+                                        
+                                        String cssClass = (status.equals("L")) ? "status-L" : "status-P";
+                                        String displayText = (status.equals("L")) ? "Nghỉ phép" : "Đi làm";
+                                        
+                                        out.print("<td class=\"" + cssClass + "\">" + displayText + "</td>");
+                                    } catch (Exception e) {
+                                        out.print("<td class=\"status-P\">Lỗi</td>");
+                                        System.out.println("Error in agenda cell: " + e.getMessage());
                                     }
-                                    
-                                    String cssClass = (status.equals("L")) ? "status-L" : "status-P";
-                                    String displayText = (status.equals("L")) ? "Nghỉ phép" : "Đi làm";
-                                    
-                                    out.print("<td class=\"" + cssClass + "\">" + displayText + "</td>");
                                 %>
                             </c:forEach>
                         </tr>

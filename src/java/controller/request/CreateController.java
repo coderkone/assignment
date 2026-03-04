@@ -36,7 +36,7 @@ public class CreateController extends BaseRequiredAuthorizationController {
         String reason = request.getParameter("reason"); // Tên tham số là 'subject'
 
         HttpSession session = request.getSession();
-        User authenticatedUser = (User) session.getAttribute("auth");
+        User authenticatedUser = (User) session.getAttribute("user");
 
         // Kiểm tra bảo vệ (Guard Check)
         if (authenticatedUser == null) {
